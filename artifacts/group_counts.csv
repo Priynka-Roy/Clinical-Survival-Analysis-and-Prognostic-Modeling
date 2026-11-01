@@ -1,0 +1,8 @@
+"group","patients","events","censored","max_followup_days","variable"
+"No hormonal therapy",440,205,235,2563,"hormon"
+"Hormonal therapy",246,94,152,2659,"hormon"
+"Premenopausal",290,119,171,2563,"meno"
+"Postmenopausal",396,180,216,2659,"meno"
+"Grade I",81,18,63,2556,"grade"
+"Grade II",444,202,242,2659,"grade"
+"Grade III",161,79,82,2471,"grade"

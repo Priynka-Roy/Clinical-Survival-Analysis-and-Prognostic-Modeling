@@ -1,0 +1,4 @@
+R: R version 4.4.2 (2024-10-31 ucrt)
+survival: 3.7.0
+Events per coefficient: 49.8333333333333
+Covariance condition number: 68.0328120183151

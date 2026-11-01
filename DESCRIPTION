@@ -1,0 +1,9 @@
+Package: SurvivalCare
+Type: Project
+Title: Clinical Survival Analysis and Prognostic Modeling
+Version: 0.1.0
+Authors@R: person('Priynka', 'Roy', role = c('aut', 'cre'))
+Description: Educational clinical survival analysis and interval reliability simulations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports: survival, shiny, bslib, ggplot2, renv, testthat, withr, rmarkdown, knitr, rsconnect

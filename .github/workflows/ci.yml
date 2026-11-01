@@ -1,0 +1,21 @@
+name: Statistical and application checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  verify:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: renv
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-renv@v2
+      - name: Statistical and Shiny tests
+        run: Rscript tests/run_tests.R
+      - name: Rebuild clinical artifacts
+        run: Rscript analysis/run_analysis.R

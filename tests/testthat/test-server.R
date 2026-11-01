@@ -1,0 +1,15 @@
+testthat::test_that('server reacts to predefined groups and runs bounded simulations', {
+  withr::local_dir('../..')
+  e <- new.env(parent=globalenv()); source('app.R',local=e)
+  shiny::testServer(e$server, {
+    session$setInputs(group='all',time=1095,ph_term='age10',simulate=0)
+    testthat::expect_equal(unname(summary(km(),times=1095)$surv),.642620382379577)
+    session$setInputs(group='grade')
+    testthat::expect_equal(length(km()$strata),3L)
+    session$setInputs(sim_n=25,lambda=.1,theta=.05,t0=5,B=50,simulate=1)
+    testthat::expect_equal(sim()$B,c(50,50))
+    testthat::expect_equal(sim()$true_survival,rep(exp(-.5),2))
+    session$setInputs(B=100000,simulate=2)
+    testthat::expect_error(sim(),'Replicates must be an integer')
+  })
+})

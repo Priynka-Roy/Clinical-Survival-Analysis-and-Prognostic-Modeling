@@ -1,0 +1,91 @@
+testthat::test_that('clinical schema, endpoint and audit are valid', {
+  d <- load_clinical_data()
+  testthat::expect_equal(nrow(d),686L)
+  testthat::expect_equal(sum(d$status),299)
+  testthat::expect_equal(sum(d$status==0),387)
+  testthat::expect_equal(anyDuplicated(d$pid),0L)
+  testthat::expect_false(anyNA(d))
+  testthat::expect_true(all(d$rfstime>=0))
+  testthat::expect_equal(as.character(d$hormon[1]),'No hormonal therapy')
+})
+
+testthat::test_that('known risk sets, KM and Greenwood arithmetic hold', {
+  p <- km_point(c(1,2,3,4),c(1,0,1,0),3)
+  testthat::expect_equal(p$risk,2L)
+  testthat::expect_equal(p$survival,3/8)
+  testthat::expect_equal(p$variance,(3/8)^2*(1/12+1/2))
+  testthat::expect_equal(p$normal_lower,p$survival-qnorm(.975)*sqrt(p$variance))
+  testthat::expect_equal(p$normal_upper,p$survival+qnorm(.975)*sqrt(p$variance))
+  testthat::expect_lt(p$loglog_lower,p$survival)
+  testthat::expect_gt(p$loglog_upper,p$survival)
+})
+
+testthat::test_that('manual intervals agree with survival away from boundaries', {
+  time <- c(1,2,3,4); status <- c(1,0,1,0)
+  fit <- survival::survfit(survival::Surv(time,status)~1,conf.type='log-log')
+  ref <- summary(fit,times=3)
+  p <- km_point(time,status,3)
+  testthat::expect_equal(p$survival,unname(ref$surv))
+  testthat::expect_equal(p$variance,unname(ref$std.err^2))
+  testthat::expect_equal(p$loglog_lower,unname(ref$lower))
+  testthat::expect_equal(p$loglog_upper,unname(ref$upper))
+  d <- load_clinical_data()
+  ref <- summary(fit_km(d),times=1095)
+  p <- km_point(d$rfstime,d$status,1095)
+  testthat::expect_equal(p$variance,unname(ref$std.err^2))
+  testthat::expect_equal(p$loglog_lower,unname(ref$lower))
+})
+
+testthat::test_that('ties and boundary policies are explicit', {
+  p <- km_point(c(1,1,2),c(1,0,1),1)
+  testthat::expect_equal(p$survival,2/3)
+  p <- km_point(1:3,c(0,0,0),2)
+  testthat::expect_equal(p$survival,1)
+  testthat::expect_equal(p$normal_lower,1)
+  testthat::expect_true(is.na(p$loglog_lower))
+  p <- km_point(1:3,c(1,1,1),3)
+  testthat::expect_equal(p$survival,0)
+  testthat::expect_true(is.na(p$variance))
+  p <- km_point(1:3,c(1,0,0),4)
+  testthat::expect_false(p$supported)
+  testthat::expect_equal(p$risk,0L)
+  testthat::expect_true(is.na(p$normal_lower))
+  p <- km_point(1:3,c(1,0,0),1)
+  testthat::expect_gt(p$normal_upper,1) # no silent clipping
+  ref <- survival::survfit(survival::Surv(1:3,c(0,0,0))~1,conf.type='log-log')
+  testthat::expect_true(is.na(ref$lower[1])) # survival 3.7-0 also leaves this undefined
+})
+
+testthat::test_that('Cox conversion and diagnostics retain model meaning', {
+  fit <- fit_cox(load_clinical_data()); tab <- cox_table(fit)
+  testthat::expect_equal(tab$HR,unname(exp(coef(fit))))
+  testthat::expect_true(all(tab$lower<tab$HR & tab$upper>tab$HR))
+  diag <- diagnose_cox(fit)
+  testthat::expect_equal(tail(diag$table$term,1),'GLOBAL')
+  testthat::expect_equal(nrow(diag$stability),length(coef(fit)))
+  testthat::expect_equal(fit$nevent,299)
+})
+
+testthat::test_that('simulation is reproducible and coverage denominators are auditable', {
+  set.seed(17); before <- .Random.seed
+  a <- run_simulation(n=25,B=30); b <- run_simulation(n=25,B=30)
+  testthat::expect_identical(a,b)
+  testthat::expect_identical(.Random.seed,before)
+  testthat::expect_equal(a$summary$true_survival,rep(exp(-.5),2))
+  testthat::expect_equal(a$summary$theoretical_censoring,rep(1/3,2))
+  for(i in 1:2) {
+    m <- a$summary$method[i]; lo <- a$draws[[paste0(m,'_lower')]]; hi <- a$draws[[paste0(m,'_upper')]]
+    valid <- is.finite(lo)&is.finite(hi)
+    hits <- valid & lo<=exp(-.5) & hi>=exp(-.5)
+    testthat::expect_equal(a$summary$success_all[i],sum(hits)/30)
+    testthat::expect_equal(a$summary$defined[i]+a$summary$undefined[i],30)
+    testthat::expect_equal(a$summary$coverage_defined[i],mean(hits[valid]))
+  }
+  late <- run_simulation(n=25,t0=1e6,B=10)
+  testthat::expect_equal(late$summary$unsupported,c(10L,10L))
+  testthat::expect_equal(late$summary$undefined,c(10L,10L))
+  testthat::expect_true(all(is.na(late$summary$coverage_defined)))
+  testthat::expect_error(run_simulation(B=100000))
+  set.seed(1); x <- generate_followup(10000,.1,.05)
+  testthat::expect_equal(mean(x$status==0),1/3,tolerance=.02)
+})

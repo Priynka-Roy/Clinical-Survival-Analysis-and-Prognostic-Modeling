@@ -1,0 +1,11 @@
+"metric","value"
+"Patients",686
+"Unique IDs",686
+"Missing cells",0
+"Duplicate IDs",0
+"Recurrence or death events",299
+"Censored",387
+"Median observed follow-up (days)",1084
+"Minimum follow-up (days)",8
+"Maximum follow-up (days)",2659
+"Excluded records",0

@@ -1,0 +1,93 @@
+---
+title: "SurvivalCare: Clinical Survival Analysis & Prognostic Modeling"
+author: "Priynka Roy"
+output:
+  html_document:
+    toc: true
+    theme: flatly
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir=normalizePath('..'))
+knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE)
+```
+
+# Executive summary
+
+Historical GBSG breast cancer data illustrate estimation under incomplete follow-up. The endpoint is first recurrence **or death**. These are educational associations and uncertainty estimates, not validated patient predictions or treatment recommendations. Primary Cox diagnostics flag proportional-hazards departures.
+
+# Clinical question and source
+
+How can researchers estimate recurrence-free survival and examine prognostic factors when follow-up is incomplete? `survival::gbsg` retains 686 complete-prognostic records from a historical 1984–1989 trial of 720 node-positive breast cancer patients. Times are days. Status 1 means recurrence/death; 0 means censored. No additional exclusions or imputation were applied. Upstream complete-record selection and historical care limit interpretation.
+
+# Data audit and clinical measurements
+
+```{r audit}
+knitr::kable(read.csv('artifacts/data_audit.csv'))
+knitr::kable(read.csv('artifacts/descriptive.csv'),digits=2)
+knitr::kable(read.csv('artifacts/group_counts.csv'))
+```
+
+Median observed event/censoring time is not median survival. The crude observed event fraction is not survival at a given follow-up time.
+
+# Kaplan–Meier and uncertainty
+
+KM multiplies 1−d/n at event times; Greenwood estimates S² sum[d/{n(n−d)}]. Normal intervals use S±zSE without clipping; log-log intervals transform log(−log(S)) and reverse limits on inversion. Independent non-informative censoring is assumed. Risk counts and support are recorded; no follow-up extrapolation. Undefined boundary quantities remain NA.
+
+```{r km}
+knitr::include_graphics(normalizePath('artifacts/kaplan_meier.png'),rel_path=FALSE)
+knitr::kable(read.csv('artifacts/overall_survival.csv'),digits=4)
+```
+
+# Predefined group comparisons
+
+```{r groups}
+knitr::kable(read.csv('artifacts/logrank.csv'),digits=5)
+```
+
+Exploratory log-rank tests compare equal survival functions under the null; comparisons are not multiplicity-adjusted. Hormonal treatment and grade show descriptive differences; menopausal status does not establish a difference here. None implies causal effects or proof of equality.
+
+# Cox associations and diagnostics
+
+The prespecified explanatory model uses age per 10 years, tumor size per 10 mm, grade II/III versus I, log2(nodes+1), and hormonal therapy versus none. Efron ties; no p-value variable selection. HRs are conditional instantaneous-hazard contrasts, not risk ratios.
+
+```{r cox}
+knitr::kable(read.csv('artifacts/cox_hazard_ratios.csv'),digits=4)
+knitr::include_graphics(normalizePath('artifacts/hazard_ratios.png'),rel_path=FALSE)
+knitr::kable(read.csv('artifacts/ph_tests.csv'),digits=5)
+knitr::include_graphics(normalizePath('artifacts/schoenfeld.png'),rel_path=FALSE)
+knitr::kable(read.csv('artifacts/influence_summary.csv'),digits=4)
+```
+
+Global PH evidence and age/grade tests limit constant HR interpretation. A simple grade-stratified sensitivity allows grade-specific baseline hazards, with no grade HR estimate; evidence of age non-PH remains. Its larger global p-value does not prove the full model assumptions.
+
+```{r sensitivity}
+knitr::kable(read.csv('artifacts/cox_grade_stratified.csv'),digits=4)
+knitr::kable(read.csv('artifacts/ph_grade_stratified.csv'),digits=5)
+```
+
+# Monte Carlo reliability study
+
+Independent exponential event/censoring times, baseline n=100, rates .1/.05, t0=5, B=2000, seed 20261101. True survival exp(−.5). Within-scenario samples are shared by methods. Coverage_defined uses the finite-interval denominator; success_all counts undefined intervals as unsuccessful out of B. Each MCSE uses its corresponding denominator. Width is conditional on finite intervals. Unsupported means t0 beyond max observed follow-up.
+
+```{r simulation}
+knitr::kable(read.csv('artifacts/baseline_simulation.csv'),digits=5)
+knitr::kable(read.csv('artifacts/simulation_scenarios.csv'),digits=4)
+```
+
+The original University of Turku coursework supplied KM/Greenwood and interval-simulation methods; its user-provided historical coverages .9450/.9485 are distinct from this rerun. Its seed/source were not available. The clinical analysis and interactive app are new. Results do not establish universal superiority of one interval method.
+
+# Limitations and conclusion
+
+Historical complete-record selection, non-informative censoring assumptions, late risk-set sparsity, exploratory comparisons, possible confounding, restricted functional forms and PH departures constrain inference. The app supports methodological learning, not modern individual prognosis or treatment recommendations. No external clinical validation is claimed. Further time-varying modeling would be necessary before stronger time-specific hazard interpretations.
+
+# Reproducibility and references
+
+```{r versions}
+cat(readLines('artifacts/sessionInfo.txt'),sep='\n')
+```
+
+- [survival dataset documentation](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/gbsg.html)
+- [Royston & Altman (2013), BMC Medical Research Methodology 13:33](https://doi.org/10.1186/1471-2288-13-33)
+- Original coursework: *Survival Models*, *Asymptotical Methods in Statistics*, University of Turku (historical details supplied in project brief).
