@@ -21,7 +21,7 @@ The current writable workspace was used instead of the preferred Documents path.
 
 ## Incomplete / unverified
 
-- GitHub target returns 404 through the account connector and repository-not-found through Git. Connected GitHub tools have no repository-creation capability. In-app browser requires login; access to the existing authenticated Chrome window was rejected by automatic approval review. No repository was created or pushed.
+- GitHub publication completed after explicit user authorization: public repository created in Priynka-Roy's signed-in browser and `main` pushed successfully. The earlier browser approval blocker is resolved. Repository: https://github.com/Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling .
 - Remote GitHub Actions has not run. Linux clean restoration/build is therefore unverified, despite a configured workflow and portable scripts.
 - Posit Connect Cloud publishing requires user account access. Files and documented workflow are prepared; no public app URL exists.
 - Narrow-screen and broader-device testing is incomplete. Local desktop interactions do not establish cross-device performance.

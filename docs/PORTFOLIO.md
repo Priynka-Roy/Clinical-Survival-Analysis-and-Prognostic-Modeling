@@ -15,6 +15,6 @@
 
 **Case study:** Follow-up incompleteness creates a statistical challenge: observed event proportions cannot substitute for survival probabilities at a common time. This project uses a historical complete-record GBSG subset to explain risk sets, censoring and uncertainty. A focused explanatory Cox model illustrates prognostic associations while its Schoenfeld diagnostics reveal a key limitation: constant HRs do not fit every covariate. An offline simulation protocol examines interval coverage, and the interactive lab exposes defined/undefined interval denominators. Reproducible aggregate artifacts and tests support technical discussion without presenting a patient-level clinical tool.
 
-GitHub target: https://github.com/Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling (publication status in STATUS.md).
+Published GitHub: https://github.com/Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling (branch main).
 
 Live application URL: null (deployment unverified). Use only authentic screenshots in artifacts; existing portfolio remains untouched.

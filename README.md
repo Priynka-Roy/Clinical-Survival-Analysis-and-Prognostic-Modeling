@@ -73,4 +73,4 @@ Original project code is MIT licensed. The dataset and package retain their upst
 
 References: [official dataset documentation](https://stat.ethz.ch/R-manual/R-devel/library/survival/html/gbsg.html); [Royston & Altman (2013), BMC Medical Research Methodology 13:33](https://doi.org/10.1186/1471-2288-13-33); [Posit Connect Cloud Shiny deployment](https://docs.posit.co/connect-cloud/how-to/r/shiny-r.html).
 
-Target GitHub: [Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling](https://github.com/Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling). This is a target, not a claim of publication. Live app URL: **not deployed**. Current status: [delivery record](docs/STATUS.md).
+Published GitHub: [Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling](https://github.com/Priynka-Roy/Clinical-Survival-Analysis-and-Prognostic-Modeling), branch `main`. Live app URL: **not deployed**. Current status: [delivery record](docs/STATUS.md).
